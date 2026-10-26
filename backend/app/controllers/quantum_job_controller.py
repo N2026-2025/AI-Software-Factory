@@ -32,8 +32,18 @@ class JobResponse(BaseModel):
 # These would be injected via dependency injection in production
 # For MVP, we instantiate here (to be refactored to DI)
 def get_refactor_service() -> CircuitRefactorService:
-    from app.repositories.duckdb_circuit_dao import DuckDBCircuitDAO
-    repo = DuckDBCircuitDAO()
+    try:
+        from app.repositories.duckdb_circuit_dao import DuckDBCircuitDAO
+        repo = DuckDBCircuitDAO()
+    except (ModuleNotFoundError, ImportError):
+        # Fallback para entornos sin compilador C++ (Windows + Python 3.14)
+        from app.repositories.interfaces import ICircuitRepository
+
+        class _FakeRepo(ICircuitRepository):
+            def save(self, circuit): pass
+            def find_by_id(self, id): return None
+            def find_by_hash(self, hash_value): return None
+        repo = _FakeRepo()
     return CircuitRefactorService(circuit_repo=repo)
 
 

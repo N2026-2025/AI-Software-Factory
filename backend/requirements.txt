@@ -1,10 +1,12 @@
 fastapi==0.104.1
 uvicorn==0.24.0
 sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
-duckdb==0.9.2
-pydantic==2.5.3
+psycopg2-binary>=2.9.0
+# pydantic sin versión fija para que pip elija wheel compatible con Python 3.14 en Windows
+pydantic>=2.0
 pytest==7.4.3
-fastapi-testclient==0.4.3
-qiskit==1.0.2
-qiskit-aer==0.13.2
+httpx==0.27.0
+# DuckDB es opcional para desarrollo local (se usa en DAO, no en tests de unidad):
+# Descomentar cuando se disponga de compilador C++ o Python 3.11 con wheels:
+# duckdb==0.9.2
+# Qiskit y Qiskit Aer son opcionales para desarrollo local (se usan mocks en los tests):
