@@ -1,0 +1,61 @@
+@startuml
+skinparam componentStyle rectangle
+title DSD - Deployment Kubernetes (UI + Controller + DAO)
+
+node "User / Browser" as User
+node "Ingress (NGINX)" as Ingress
+
+cloud "Internet" as Cloud
+
+node "Namespace: quantum-factory" as ns {
+
+  node "Service: UI (React+Vite)" as UISvc
+  pod "Deployment: ui" as UIPod {
+    container "React + Vite (5173)" as ReactCont
+  }
+
+  node "Service: Backend API (FastAPI)" as BackendSvc
+  pod "Deployment: backend" as BackendPod {
+    container "Controller + Service + DAO" as APICont
+    container "Sidecar: OpenTelemetry" as OTelCont
+  }
+
+  node "Service: MCP Server (Qiskit)" as MCP Svc
+  pod "Deployment: mcp-server" as MCPpod {
+    container "MCP Server stdio" as MCPCont
+  }
+
+  node "StatefulSet: PostgreSQL (Jobs)" as Postgres
+  pod "Pod: postgres" as PGpod {
+    container "PostgreSQL 15" as PGCont
+    volume "PVC: pg-jobs" as PGData
+  }
+
+  node "StatefulSet: DuckDB (Circuits)" as DuckDB
+  pod "Pod: duckdb" as Duckpod {
+    container "DuckDB (validator)" as DuckCont
+    volume "PVC: duckdb-data" as DuckData
+  }
+
+  pod "CronJob: on-call-agent" as OnCallPod {
+    container "Python On-Call Agent" as OnCallCont
+  }
+}
+
+node "External (optional)" as External {
+  database "IBM Quantum (QPU real)" as QPU
+}
+
+User --> Ingress: HTTPS
+Ingress --> UISvc: HTTP
+Ingress --> BackendSvc: HTTP
+
+UIPod --> BackendSvc: API REST
+BackendSvc --> PGpod: SQL (QuantumJobRepository DAO)
+BackendSvc --> Duckpod: SQL (CircuitRepository DAO)
+BackendSvc --> MCPpod: MCP / stdio
+MCPpod --> QPU: execute circuit (optional)
+
+OnCallPod -.-> GitHub: webhook / issues
+OnCallPod --> BackendSvc: remediation / rollback
+@enduml

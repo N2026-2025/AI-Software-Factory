@@ -1,0 +1,27 @@
+@startuml
+title DSD - Refactor Qiskit Circuit (GRASP: Controller + Expert + DAO)
+
+actor User
+participant "UI (React)" as UI
+participant "QuantumJobController" as Controller <<Controller>>
+participant "CircuitRefactorService" as Service
+participant "QiskitCircuit" as Circuit <<Expert>>
+participant "DuckDBCircuitDAO" as DAO <<DAO>>
+datastore "DuckDB" as DB
+
+User -> UI: Upload Qiskit code
+UI -> Controller: POST /refactor
+Controller -> Service: refactorLegacyCode(code)
+Service -> Circuit: validate()
+Circuit --> Service: valid
+Service -> Circuit: transpile(level=2)
+Circuit --> Circuit: transpiled circuit
+Service -> Circuit: computeMetrics()
+Circuit --> Service: RefactorMetrics
+Service -> DAO: save(version)
+DAO -> DB: INSERT
+DAO --> Service: ok
+Service --> Controller: CircuitVersion + metrics
+Controller --> UI: 200 JSON
+UI --> User: Show before/after + KPIs
+@enduml

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+node_modules/
+dist/
+build/
+*.puml.png
+.idea/
+.vscode/
+.DS_Store
+alembic/versions/*.py

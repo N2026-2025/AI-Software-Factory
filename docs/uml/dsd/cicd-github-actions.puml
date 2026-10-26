@@ -1,0 +1,39 @@
+@startuml
+skinparam sequence {
+  ArrowColor #4267B2
+  ActorBorderColor #4267B2
+  LifeLineBorderColor #4267B2
+}
+
+title DSD - CI/CD Flow (GitHub Actions)
+
+actor "Developer" as Dev
+participant "GitHub Repo" as Repo
+participant "GitHub Actions (CI)" as CI
+participant "Docker Registry" as Registry
+participant "Kubernetes (Dev)" as K8sDev
+participant "Kubernetes (Prod)" as K8sProd
+
+Dev -> Repo: Push / Pull Request
+Repo -> CI: Trigger workflow
+
+CI -> CI: Lint (ruff, mypy)
+CI -> CI: Tests (pytest, vitest)
+alt Tests fail
+  CI --> Dev: ❌ PR failed
+  stop
+else Tests pass
+  CI -> CI: Build Docker image
+  CI -> Registry: Push image (tag: sha)
+end
+
+alt main / develop branch
+  CI -> K8sDev: Deploy automatically (dev)
+  CI --> Dev: ✅ Deployed to dev
+else release / tag branch
+  CI --> Dev: ⏳ Waiting for manual approval
+  Dev -> CI: Approve production deploy
+  CI -> K8sProd: Deploy manually (production)
+  CI --> Dev: ✅ Deployed to prod
+end
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+title DSD - Run Quantum Job (Controller + Service + DAO)
+
+actor User
+participant UI
+participant Controller <<Controller>>
+participant "QuantumJobService" as Service
+participant "PostgresQuantumJobDAO" as JobDAO <<DAO>>
+participant "AerSimulatorBackend" as Aer <<Expert>>
+datastore "PostgreSQL" as DB
+
+User -> UI: Select circuit + shots
+UI -> Controller: POST /quantum-job
+Controller -> Service: submitJob(versionId, shots)
+Service -> JobDAO: createJob(PENDING)
+JobDAO --> Service: QuantumJob
+Service -> Aer: run(circuit, shots)
+Aer --> Service: counts
+Service -> QuantumJob: transitionTo(COMPLETED)
+Service -> JobDAO: update(job)
+JobDAO --> DB: UPDATE
+JobDAO --> Service: ok
+Service --> Controller: JobResponse
+Controller --> UI: 200 {jobId, counts}
+UI --> User: Show histogram
+@enduml

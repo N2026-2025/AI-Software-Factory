@@ -1,0 +1,51 @@
+@startuml
+skinparam componentStyle rectangle
+title DSD - Component Diagram Fullstack (UI + Controller)
+
+package "UI (React + Vite)" {
+  component "RefactorPage"
+  component "JobDashboard"
+  component "CircuitVisualizer"
+  component "HistogramChart"
+  component "ApiClient"
+}
+
+package "Controller (FastAPI)" {
+  component "QuantumJobController"
+  component "TraceMiddleware"
+}
+
+package "Services" {
+  component "CircuitRefactorService"
+  component "QuantumJobService"
+}
+
+package "Repositories (DAO)" {
+  component "ICircuitRepository <<interface>>"
+  component "IQuantumJobRepository <<interface>>"
+  component "DuckDBCircuitDAO"
+  component "PostgresQuantumJobDAO"
+}
+
+package "Domain" {
+  component "QiskitCircuit"
+  component "CircuitVersion"
+  component "QuantumJob"
+  component "RefactorMetrics"
+  component "JobExecutionLog"
+}
+
+package "Infrastructure" {
+  component "AerSimulatorBackend"
+  component "PostgreSQL"
+  component "DuckDB"
+}
+
+UI --> Controller: HTTP REST
+Controller --> Services: delegates
+Services --> Repositories: uses DAO interfaces
+Repositories --> Domain: map to domain objects
+Services --> Infrastructure: run quantum jobs
+Infrastructure --> PostgreSQL: persist jobs
+Infrastructure --> DuckDB: persist circuit versions
+@enduml

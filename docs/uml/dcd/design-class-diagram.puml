@@ -1,0 +1,69 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+title DCD - Quantum Data Factory (GRASP + Repository DAO + Correlación de Objetos)
+
+package "Domain" {
+  class QiskitCircuit {
+    - qubitCount: int
+    - gates: list<QuantumGate>
+    + validate(): bool
+    + transpile(level: int): QiskitCircuit
+  }
+  class QuantumGate
+  class CircuitVersion {
+    - versionId: UUID
+    - circuit: QiskitCircuit
+    - metrics: RefactorMetrics
+  }
+  class RefactorMetrics
+  class QuantumJob {
+    - jobId: UUID
+    - circuitVersionId: UUID
+    - counts: map<string,int>
+    - status: string
+    - traceId: string
+    - logs: list<JobExecutionLog>
+    + transitionTo(status: string): void
+  }
+  class JobExecutionLog
+  class Alert
+}
+
+package "Application (Services)" {
+  class CircuitRefactorService
+  class QuantumJobService
+}
+
+package "Infrastructure (Repository DAO)" {
+  class ICircuitRepository <<interface>>
+  class IQuantumJobRepository <<interface>>
+  class PostgresQuantumJobDAO
+  class DuckDBCircuitDAO
+  class AerSimulatorBackend <<Expert>>
+}
+
+package "Presentation" {
+  class QuantumJobController <<Controller>>
+}
+
+package "AI Agents" {
+  class AgentTeam "1" *-- "many" IAgent
+  class IAgent <<interface>>
+  class OnCallAgent
+}
+
+QuantumJob "1" *-- "many" JobExecutionLog
+QuantumJob "1" --> "1" CircuitVersion
+CircuitVersion "1" *-- "1" QiskitCircuit
+CircuitVersion "1" *-- "1" RefactorMetrics
+QiskitCircuit "1" -- "many" QuantumGate
+
+QuantumJobController ..> QuantumJobService
+QuantumJobService ..> IQuantumJobRepository
+QuantumJobService ..> ICircuitRepository
+QuantumJobService ..> AerSimulatorBackend
+PostgresQuantumJobDAO ..|> IQuantumJobRepository
+DuckDBCircuitDAO ..|> ICircuitRepository
+AgentTeam ..> OnCallAgent
+@enduml

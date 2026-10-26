@@ -1,0 +1,118 @@
+openapi: 3.0.3
+info:
+  title: Quantum Data Factory API
+  description: Contrato fuente de verdad entre el UI y el backend de la AI Factory cuántica.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Desarrollo local
+
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Estado del servicio
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /refactor:
+    post:
+      operationId: refactorCircuit
+      summary: Refactoriza un circuito Qiskit legacy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [source_code]
+              properties:
+                source_code:
+                  type: string
+                  description: Código Python con QuantumCircuit de Qiskit
+      responses:
+        "200":
+          description: Circuito refactorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version_id:
+                    type: string
+                  depth:
+                    type: integer
+                  gate_count:
+                    type: integer
+                  qubit_count:
+                    type: integer
+        "400":
+          description: Código inválido
+
+  /quantum-job:
+    post:
+      operationId: runQuantumJob
+      summary: Ejecuta un job cuántico en Aer local
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [circuit_version_id]
+              properties:
+                circuit_version_id:
+                  type: string
+                shots:
+                  type: integer
+                  default: 1024
+      responses:
+        "200":
+          description: Job creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                  trace_id:
+                    type: string
+
+  /jobs/{job_id}:
+    get:
+      operationId: getJob
+      summary: Obtener estado de un job cuántico
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle del job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                  trace_id:
+                    type: string
+        "404":
+          description: Job no encontrado

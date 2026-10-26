@@ -1,0 +1,56 @@
+@startuml
+skinparam packageStyle rectangle
+title DCD - Package Diagram
+
+package "UI (React+Vite)" {
+  component "RefactorPage"
+  component "JobDashboard"
+  component "ApiClient"
+}
+
+package "Controller (FastAPI)" {
+  component "QuantumJobController"
+}
+
+package "Services" {
+  component "CircuitRefactorService"
+  component "QuantumJobService"
+}
+
+package "Repositories (DAO)" {
+  component "ICircuitRepository <<interface>>"
+  component "IQuantumJobRepository <<interface>>"
+  component "DuckDBCircuitDAO"
+  component "PostgresQuantumJobDAO"
+}
+
+package "Domain" {
+  component "QiskitCircuit"
+  component "CircuitVersion"
+  component "QuantumJob"
+  component "RefactorMetrics"
+}
+
+package "Infrastructure" {
+  component "AerSimulatorBackend"
+  component "PostgreSQL"
+  component "DuckDB"
+}
+
+package "MCP Server" {
+  component "qiskit_mcp_server"
+}
+
+package "AI Agents (Module 5)" {
+  component "OnCallAgent"
+  component "AgentTeam"
+}
+
+Ui "UI" --> Controller "Controller": HTTP
+Controller --> Services: delegates
+Services --> Repositories: uses
+Repositories --> Domain: persists
+Services --> Infrastructure: executes
+Infrastructure --> MCP: tools
+AI Agents --> MCP: calls
+@enduml

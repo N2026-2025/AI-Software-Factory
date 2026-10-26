@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: on-call-agent
+  namespace: quantum-factory
+spec:
+  template:
+    spec:
+      containers:
+        - name: oncall
+          image: quantum-data-factory/oncall-agent:latest
+          command: ["python", "agent-capabilities/custom-agent/oncall_agent.py", "/alerts/alert.json"]
+      restartPolicy: Never
+  backoffLimit: 3

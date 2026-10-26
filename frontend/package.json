@@ -1,0 +1,22 @@
+{
+  "name": "quantum-data-factory-ui",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@testing-library/react": "^14.1.2",
+    "jsdom": "^23.0.0"
+  }
+}

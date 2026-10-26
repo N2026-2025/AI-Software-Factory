@@ -1,0 +1,25 @@
+@startuml
+title DSD - On-Call Agent Remediation
+
+actor "Monitoring System" as Monitor
+participant "OnCallAgent" as Agent
+participant "QuantumJobService" as Service
+participant "PostgresQuantumJobDAO" as JobDAO <<DAO>>
+participant "GitHub API" as GitHub
+datastore "PostgreSQL" as DB
+
+Monitor -> Agent: Alert: job_failed
+Agent -> JobDAO: findById(jobId)
+JobDAO --> Agent: QuantumJob (FAILED)
+Agent -> Service: getJobDetails(jobId)
+Service --> Agent: failure reason
+alt Transient
+  Agent -> Service: retryJob(jobId)
+  Service --> Agent: requeued
+  Agent --> Monitor: Resolved
+else Faulty refactor
+  Agent -> GitHub: git revert + PR
+  GitHub --> Agent: PR created
+  Agent --> Monitor: Mitigated via PR
+end
+@enduml
